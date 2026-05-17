@@ -1,0 +1,1534 @@
+{
+  "info": {
+    "_postman_id": "c1f2b7c4-6b6a-4e5f-9a39-8e6a7c2b1001",
+    "name": "Dashboard Backend API (Nest) - Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Status/Invalid input/Response shape/Performance tests for all existing APIs. Auth uses JWT Bearer token (Authorization header). Run 'Auth (JWT)' folder first to populate tokens."
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global helpers",
+          "pm.variables.set('nowTs', Date.now());",
+          "pm.variables.set('rand', Math.floor(Math.random() * 1e9));"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET /health (connectivity)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 200', () => pm.response.to.have.status(200));",
+                  "pm.test('response time < 1000ms', () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+                  "pm.test('content-type is json', () => pm.response.to.have.header('Content-Type'));",
+                  "const j = pm.response.json();",
+                  "pm.test('body.ok === true', () => pm.expect(j.ok).to.eql(true));",
+                  "pm.test('body.ts exists', () => pm.expect(j.ts).to.be.a('string'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Auth (JWT)",
+      "item": [
+        {
+          "name": "POST /auth/login (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"{{adminEmail}}\", \"password\": \"{{defaultPassword}}\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 200', () => pm.response.to.have.status(200));",
+                  "pm.test('response time < 1000ms', () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+                  "const j = pm.response.json();",
+                  "pm.test('has access_token', () => pm.expect(j.access_token).to.be.a('string'));",
+                  "pm.environment.set('adminToken', j.access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /auth/login (manager)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"{{managerEmail}}\", \"password\": \"{{defaultPassword}}\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 200', () => pm.response.to.have.status(200));",
+                  "pm.test('response time < 1000ms', () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+                  "const j = pm.response.json();",
+                  "pm.test('has access_token', () => pm.expect(j.access_token).to.be.a('string'));",
+                  "pm.environment.set('managerToken', j.access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /auth/login (user)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"{{userEmail}}\", \"password\": \"{{defaultPassword}}\"}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 200', () => pm.response.to.have.status(200));",
+                  "pm.test('response time < 1000ms', () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+                  "const j = pm.response.json();",
+                  "pm.test('has access_token', () => pm.expect(j.access_token).to.be.a('string'));",
+                  "pm.environment.set('userToken', j.access_token);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "GET /users/me (admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 200', () => pm.response.to.have.status(200));",
+                  "pm.test('response time < 1000ms', () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+                  "const j = pm.response.json();",
+                  "pm.test('has id/email/role', () => {",
+                  "  pm.expect(j).to.have.property('id');",
+                  "  pm.expect(j).to.have.property('email');",
+                  "  pm.expect(j).to.have.property('role');",
+                  "});",
+                  "pm.test('email matches adminEmail', () => pm.expect(j.email).to.eql(pm.environment.get('adminEmail')));",
+                  "pm.test('role is admin', () => pm.expect(j.role).to.eql('admin'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /users/me (missing header -> 400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /users/me (unknown user -> 404)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{invalidToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 401', () => pm.response.to.have.status(401));",
+                  "pm.test('response time < 1000ms', () => pm.expect(pm.response.responseTime).to.be.below(1000));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /users/me (valid update: name/title)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman User\",\n  \"title\": \"QA\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 200', () => pm.response.to.have.status(200));",
+                  "pm.test('response time < 1000ms', () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+                  "const j = pm.response.json();",
+                  "pm.test('email unchanged', () => pm.expect(j.email).to.eql(pm.environment.get('userEmail')));",
+                  "pm.test('name updated', () => pm.expect(j.name).to.eql('Postman User'));",
+                  "pm.test('title updated', () => pm.expect(j.title).to.eql('QA'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /users/me (illegal role change -> 403)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /users (user -> 403)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /users (manager -> 200)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 200', () => pm.response.to.have.status(200));",
+                  "pm.test('array response', () => pm.expect(pm.response.json()).to.be.an('array'));",
+                  "pm.test('response time < 1000ms', () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+                  "pm.test('each has email/role', () => {",
+                  "  const arr = pm.response.json();",
+                  "  pm.expect(arr.length).to.be.greaterThan(0);",
+                  "  pm.expect(arr[0]).to.have.property('email');",
+                  "  pm.expect(arr[0]).to.have.property('role');",
+                  "});",
+                  "pm.test('contains seeded accounts', () => {",
+                  "  const emails = new Set(pm.response.json().map(x => x.email));",
+                  "  pm.expect(emails.has(pm.environment.get('adminEmail'))).to.eql(true);",
+                  "  pm.expect(emails.has(pm.environment.get('managerEmail'))).to.eql(true);",
+                  "  pm.expect(emails.has(pm.environment.get('userEmail'))).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /users (manager creates user) -> store tmpUserId",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"tmp_{{nowTs}}_{{rand}}@example.com\",\n  \"name\": \"Tmp\",\n  \"title\": \"Tmp\",\n  \"status\": \"active\",\n  \"role\": \"user\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 201', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.test('created has id/email/role', () => { pm.expect(j.id).to.be.a('string'); pm.expect(j.email).to.be.a('string'); pm.expect(j.role).to.eql('user'); });",
+                  "pm.environment.set('tmpUserId', j.id);",
+                  "pm.environment.set('tmpUserEmail', j.email);",
+                  "pm.test('response time < 1000ms', () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+                  "pm.test('email looks like tmp_*', () => pm.expect(j.email).to.match(/^tmp_/));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /users (invalid input: empty email -> 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"\",\n  \"role\": \"user\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 400', () => pm.response.to.have.status(400));",
+                  "pm.test('response time < 1000ms', () => pm.expect(pm.response.responseTime).to.be.below(1000));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /users (manager creates manager -> 403)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"badrole_{{nowTs}}@example.com\",\n  \"role\": \"manager\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /users/:id (manager role change -> 403)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"manager\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{tmpUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{tmpUserId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /users/:id (admin role change -> 200)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"manager\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{tmpUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{tmpUserId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('role now manager', () => pm.expect(j.role).to.eql('manager'));",
+                  "pm.test('response time < 1000ms', () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+                  "pm.test('id matches tmpUserId', () => pm.expect(j.id).to.eql(pm.environment.get('tmpUserId')));",
+                  "pm.test('email matches tmpUserEmail', () => pm.expect(j.email).to.eql(pm.environment.get('tmpUserEmail')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /users/:id (admin role back to user -> 200)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"user\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{tmpUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{tmpUserId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('role now user', () => pm.expect(j.role).to.eql('user'));",
+                  "pm.test('response time < 1000ms', () => pm.expect(pm.response.responseTime).to.be.below(1000));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /users/:id (manager deletes tmp user -> 200)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{tmpUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{tmpUserId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 200', () => pm.response.to.have.status(200));",
+                  "pm.test('body.ok === true', () => pm.expect(pm.response.json().ok).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Companies",
+      "item": [
+        {
+          "name": "GET /companies (user -> 200)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/companies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 200', () => pm.response.to.have.status(200));",
+                  "pm.test('array response', () => pm.expect(pm.response.json()).to.be.an('array'));",
+                  "pm.test('response time < 1000ms', () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+                  "pm.test('first has company_code', () => { const a = pm.response.json(); pm.expect(a.length).to.be.greaterThan(0); pm.expect(a[0]).to.have.property('company_code'); });",
+                  "pm.test('first has company_name', () => { const a = pm.response.json(); pm.expect(a[0]).to.have.property('company_name'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /companies (user -> 403)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"company_code\": \"PM_{{nowTs}}\",\n  \"company_name\": \"Postman Co\",\n  \"level\": 2,\n  \"country\": \"USA\",\n  \"city\": \"NY\",\n  \"founded_year\": 2020,\n  \"annual_revenue\": 1000,\n  \"employees\": 10\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/companies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /companies (manager -> 201) store tmpCompanyCode",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"company_code\": \"PM_{{nowTs}}_{{rand}}\",\n  \"company_name\": \"Postman Co\",\n  \"level\": 2,\n  \"country\": \"USA\",\n  \"city\": \"NY\",\n  \"founded_year\": 2020,\n  \"annual_revenue\": 1000,\n  \"employees\": 10\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/companies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 201', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.environment.set('tmpCompanyCode', j.company_code);",
+                  "pm.test('created has company_code', () => pm.expect(j.company_code).to.be.a('string'));",
+                  "pm.test('created has company_name', () => pm.expect(j.company_name).to.eql('Postman Co'));",
+                  "pm.test('response time < 1000ms', () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+                  "pm.test('level is number', () => pm.expect(j.level).to.eql(2));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /companies (invalid input: missing company_code -> 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"company_code\": \"\",\n  \"company_name\": \"Bad\",\n  \"level\": 2,\n  \"country\": \"USA\",\n  \"city\": \"NY\",\n  \"founded_year\": 2020,\n  \"annual_revenue\": 1000,\n  \"employees\": 10\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/companies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 400', () => pm.response.to.have.status(400));",
+                  "pm.test('response time < 1000ms', () => pm.expect(pm.response.responseTime).to.be.below(1000));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /companies/:code (invalid input: level as string -> 400)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"level\": \"oops\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/companies/{{tmpCompanyCode}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies",
+                "{{tmpCompanyCode}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /companies/:code (manager -> 200)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{managerToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"company_name\": \"Postman Co Updated\",\n  \"employees\": 99\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/companies/{{tmpCompanyCode}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies",
+                "{{tmpCompanyCode}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('name updated', () => pm.expect(j.company_name).to.eql('Postman Co Updated'));",
+                  "pm.test('employees updated', () => pm.expect(j.employees).to.eql(99));",
+                  "pm.test('response time < 1000ms', () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+                  "pm.test('code matches tmpCompanyCode', () => pm.expect(j.company_code).to.eql(pm.environment.get('tmpCompanyCode')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /companies/:code (admin -> 200 cleanup)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/companies/{{tmpCompanyCode}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies",
+                "{{tmpCompanyCode}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 200', () => pm.response.to.have.status(200));",
+                  "pm.test('body.ok === true', () => pm.expect(pm.response.json().ok).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /companies/filter (missing header -> 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dimension\": \"country\",\n  \"filter\": {\n    \"level\": [],\n    \"country\": [\"China\"],\n    \"city\": [],\n    \"founded_year\": {\"start\": \"\", \"end\": \"\"},\n    \"annual_revenue\": {\"min\": \"\", \"max\": \"\"},\n    \"employees\": {\"min\": \"\", \"max\": \"\"}\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/companies/filter",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies",
+                "filter"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /companies/filter (invalid dimension -> 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dimension\": \"bad\",\n  \"filter\": {\n    \"level\": [],\n    \"country\": [],\n    \"city\": [],\n    \"founded_year\": {\"start\": \"\", \"end\": \"\"},\n    \"annual_revenue\": {\"min\": \"\", \"max\": \"\"},\n    \"employees\": {\"min\": \"\", \"max\": \"\"}\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/companies/filter",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies",
+                "filter"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /companies/filter (invalid input: missing filter -> 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dimension\": \"country\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/companies/filter",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies",
+                "filter"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 400', () => pm.response.to.have.status(400));",
+                  "pm.test('response time < 1000ms', () => pm.expect(pm.response.responseTime).to.be.below(1000));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /companies/filter (invalid input: level contains string -> 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dimension\": \"country\",\n  \"filter\": {\n    \"level\": [\"1\"],\n    \"country\": [],\n    \"city\": [],\n    \"founded_year\": {\"start\": \"\", \"end\": \"\"},\n    \"annual_revenue\": {\"min\": \"\", \"max\": \"\"},\n    \"employees\": {\"min\": \"\", \"max\": \"\"}\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/companies/filter",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies",
+                "filter"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 400', () => pm.response.to.have.status(400));",
+                  "pm.test('response time < 1000ms', () => pm.expect(pm.response.responseTime).to.be.below(1000));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /companies/filter (user -> 201) verify response shape",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dimension\": \"country\",\n  \"filter\": {\n    \"level\": [],\n    \"country\": [\"China\"],\n    \"city\": [],\n    \"founded_year\": {\"start\": \"\", \"end\": \"\"},\n    \"annual_revenue\": {\"min\": \"\", \"max\": \"\"},\n    \"employees\": {\"min\": \"\", \"max\": \"\"}\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/companies/filter",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies",
+                "filter"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 201', () => pm.response.to.have.status(201));",
+                  "pm.test('response time < 1200ms', () => pm.expect(pm.response.responseTime).to.be.below(1200));",
+                  "const j = pm.response.json();",
+                  "pm.test('has dimension/data/filter/total', () => { pm.expect(j.dimension).to.eql('country'); pm.expect(j).to.have.property('data'); pm.expect(j).to.have.property('filter'); pm.expect(j).to.have.property('total'); });",
+                  "pm.test('data is object map', () => pm.expect(j.data).to.be.an('object'));",
+                  "pm.test('total is number', () => pm.expect(j.total).to.be.a('number'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "GET /dashboard/summary (missing header -> 400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "summary"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /dashboard/summary (user -> 200) verify shape",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "summary"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 200', () => pm.response.to.have.status(200));",
+                  "pm.test('response time < 1000ms', () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+                  "const j = pm.response.json();",
+                  "pm.test('has KPI keys', () => {",
+                  "  pm.expect(j).to.have.property('companyCount');",
+                  "  pm.expect(j).to.have.property('totalRevenue');",
+                  "  pm.expect(j).to.have.property('countriesCovered');",
+                  "  pm.expect(j).to.have.property('totalEmployees');",
+                  "});",
+                  "pm.test('values are numbers', () => {",
+                  "  pm.expect(j.companyCount).to.be.a('number');",
+                  "  pm.expect(j.totalRevenue).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /dashboard/level-share (user -> 200)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/level-share",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "level-share"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 200', () => pm.response.to.have.status(200));",
+                  "pm.test('response time < 1000ms', () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+                  "const j = pm.response.json();",
+                  "pm.test('has total/items', () => { pm.expect(j).to.have.property('total'); pm.expect(j).to.have.property('items'); });",
+                  "pm.test('items is array', () => pm.expect(j.items).to.be.an('array'));",
+                  "pm.test('item has level/count/percent', () => { if (j.items.length) { pm.expect(j.items[0]).to.have.property('level'); pm.expect(j.items[0]).to.have.property('count'); pm.expect(j.items[0]).to.have.property('percent'); } });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /dashboard/growth (user -> 200)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/growth",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "growth"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 200', () => pm.response.to.have.status(200));",
+                  "pm.test('response time < 1000ms', () => pm.expect(pm.response.responseTime).to.be.below(1000));",
+                  "const j = pm.response.json();",
+                  "pm.test('has points array', () => pm.expect(j.points).to.be.an('array'));",
+                  "pm.test('point has year/cumulative', () => { if (j.points.length) { pm.expect(j.points[0]).to.have.property('year'); pm.expect(j.points[0]).to.have.property('cumulative'); } });",
+                  "pm.test('cumulative is non-decreasing', () => { const pts=j.points; for (let i=1;i<pts.length;i++){ pm.expect(pts[i].cumulative).to.be.at.least(pts[i-1].cumulative);} });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /dashboard/bubble (user -> 201 or 200) verify shape",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dimension\": \"level\",\n  \"filter\": {\n    \"level\": [],\n    \"country\": [],\n    \"city\": [],\n    \"founded_year\": {\"start\": \"\", \"end\": \"\"},\n    \"annual_revenue\": {\"min\": \"\", \"max\": \"\"},\n    \"employees\": {\"min\": \"\", \"max\": \"\"}\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/bubble",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "bubble"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 200/201', () => pm.expect([200, 201]).to.include(pm.response.code));",
+                  "pm.test('response time < 1500ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "const j = pm.response.json();",
+                  "pm.test('has name/children/total/dimension', () => { pm.expect(j).to.have.property('name'); pm.expect(j).to.have.property('children'); pm.expect(j).to.have.property('total'); pm.expect(j).to.have.property('dimension'); });",
+                  "pm.test('children is array', () => pm.expect(j.children).to.be.an('array'));",
+                  "pm.test('dimension matches request', () => pm.expect(j.dimension).to.eql('level'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /dashboard/bubble (invalid dimension -> 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dimension\": \"bad\",\n  \"filter\": {\n    \"level\": [],\n    \"country\": [],\n    \"city\": [],\n    \"founded_year\": {\"start\": \"\", \"end\": \"\"},\n    \"annual_revenue\": {\"min\": \"\", \"max\": \"\"},\n    \"employees\": {\"min\": \"\", \"max\": \"\"}\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/bubble",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "bubble"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /dashboard/bubble (invalid input: missing filter -> 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dimension\": \"level\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/bubble",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "bubble"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code 400', () => pm.response.to.have.status(400));",
+                  "pm.test('response time < 1000ms', () => pm.expect(pm.response.responseTime).to.be.below(1000));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

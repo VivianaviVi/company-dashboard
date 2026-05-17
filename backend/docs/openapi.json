@@ -1,0 +1,732 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "HealthController_health",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Connectivity check (no auth required).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "ts": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Health"
+        ]
+      }
+    },
+    "/users/me": {
+      "get": {
+        "operationId": "UsersController_meGet",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Get current user profile."
+          },
+          "400": {
+            "description": "Missing x-user-email header."
+          }
+        },
+        "security": [
+          {
+            "x-user-email": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      },
+      "patch": {
+        "operationId": "UsersController_mePatch",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Update current user profile (email not editable)."
+          },
+          "400": {
+            "description": "Missing x-user-email header or invalid body."
+          }
+        },
+        "security": [
+          {
+            "x-user-email": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users": {
+      "get": {
+        "operationId": "UsersController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List all users (admin/manager only)."
+          },
+          "403": {
+            "description": "Forbidden for role=user."
+          }
+        },
+        "security": [
+          {
+            "x-user-email": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      },
+      "post": {
+        "operationId": "UsersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Create a new user (admin/manager with RBAC rules)."
+          },
+          "400": {
+            "description": "Invalid body."
+          },
+          "403": {
+            "description": "Not allowed by RBAC."
+          }
+        },
+        "security": [
+          {
+            "x-user-email": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/{id}": {
+      "patch": {
+        "operationId": "UsersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Update a target user (RBAC enforced; only admin can change role)."
+          },
+          "400": {
+            "description": "Invalid body."
+          },
+          "403": {
+            "description": "Not allowed by RBAC."
+          }
+        },
+        "security": [
+          {
+            "x-user-email": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      },
+      "delete": {
+        "operationId": "UsersController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete a target user (RBAC enforced)."
+          },
+          "403": {
+            "description": "Not allowed by RBAC."
+          }
+        },
+        "security": [
+          {
+            "x-user-email": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/companies": {
+      "get": {
+        "operationId": "CompaniesController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List all companies (any logged-in user)."
+          }
+        },
+        "security": [
+          {
+            "x-user-email": []
+          }
+        ],
+        "tags": [
+          "Companies"
+        ]
+      },
+      "post": {
+        "operationId": "CompaniesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCompanyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Create a company (admin/manager only)."
+          },
+          "400": {
+            "description": "Invalid body."
+          },
+          "403": {
+            "description": "Not allowed by RBAC."
+          }
+        },
+        "security": [
+          {
+            "x-user-email": []
+          }
+        ],
+        "tags": [
+          "Companies"
+        ]
+      }
+    },
+    "/companies/{code}": {
+      "patch": {
+        "operationId": "CompaniesController_update",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCompanyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Update a company (admin/manager only)."
+          },
+          "400": {
+            "description": "Invalid body."
+          },
+          "403": {
+            "description": "Not allowed by RBAC."
+          }
+        },
+        "security": [
+          {
+            "x-user-email": []
+          }
+        ],
+        "tags": [
+          "Companies"
+        ]
+      },
+      "delete": {
+        "operationId": "CompaniesController_remove",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete a company (admin/manager only)."
+          },
+          "403": {
+            "description": "Not allowed by RBAC."
+          }
+        },
+        "security": [
+          {
+            "x-user-email": []
+          }
+        ],
+        "tags": [
+          "Companies"
+        ]
+      }
+    },
+    "/companies/filter": {
+      "post": {
+        "operationId": "CompaniesController_filter",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Filter and group companies by dimension (any logged-in user)."
+          },
+          "400": {
+            "description": "Invalid body."
+          }
+        },
+        "security": [
+          {
+            "x-user-email": []
+          }
+        ],
+        "tags": [
+          "Companies"
+        ]
+      }
+    },
+    "/dashboard/summary": {
+      "get": {
+        "operationId": "DashboardController_summary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "KPI summary cards for dashboard."
+          }
+        },
+        "security": [
+          {
+            "x-user-email": []
+          }
+        ],
+        "tags": [
+          "Dashboard"
+        ]
+      }
+    },
+    "/dashboard/level-share": {
+      "get": {
+        "operationId": "DashboardController_levelShare",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Donut chart: company count share by level."
+          }
+        },
+        "security": [
+          {
+            "x-user-email": []
+          }
+        ],
+        "tags": [
+          "Dashboard"
+        ]
+      }
+    },
+    "/dashboard/growth": {
+      "get": {
+        "operationId": "DashboardController_growth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Line chart: cumulative company count by founded year."
+          }
+        },
+        "security": [
+          {
+            "x-user-email": []
+          }
+        ],
+        "tags": [
+          "Dashboard"
+        ]
+      }
+    },
+    "/dashboard/bubble": {
+      "post": {
+        "operationId": "DashboardController_bubble",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bubble chart hierarchy data (circle packing) based on filter + dimension."
+          },
+          "400": {
+            "description": "Invalid body."
+          }
+        },
+        "security": [
+          {
+            "x-user-email": []
+          }
+        ],
+        "tags": [
+          "Dashboard"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Dashboard Backend API",
+    "description": "Nest.js + TypeORM (SQLite) backend for Dashboard assignment",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "x-user-email": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-user-email"
+      }
+    },
+    "schemas": {
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Alice"
+          },
+          "title": {
+            "type": "string",
+            "example": "Senior Analyst"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "example": "active"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "manager",
+              "user"
+            ],
+            "example": "manager"
+          }
+        }
+      },
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "someone@example.com"
+          },
+          "name": {
+            "type": "string",
+            "example": "Alice"
+          },
+          "title": {
+            "type": "string",
+            "example": "Analyst"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "example": "active"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "manager",
+              "user"
+            ],
+            "example": "user"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "CreateCompanyDto": {
+        "type": "object",
+        "properties": {
+          "company_code": {
+            "type": "string",
+            "example": "C100"
+          },
+          "company_name": {
+            "type": "string",
+            "example": "Acme Inc"
+          },
+          "level": {
+            "type": "number",
+            "example": 2,
+            "minimum": 1
+          },
+          "country": {
+            "type": "string",
+            "example": "USA"
+          },
+          "city": {
+            "type": "string",
+            "example": "New York"
+          },
+          "founded_year": {
+            "type": "number",
+            "example": 2001
+          },
+          "annual_revenue": {
+            "type": "number",
+            "example": 123456
+          },
+          "employees": {
+            "type": "number",
+            "example": 250
+          }
+        },
+        "required": [
+          "company_code",
+          "company_name",
+          "level",
+          "country",
+          "city",
+          "founded_year",
+          "annual_revenue",
+          "employees"
+        ]
+      },
+      "UpdateCompanyDto": {
+        "type": "object",
+        "properties": {
+          "company_name": {
+            "type": "string",
+            "example": "Acme Inc (Updated)"
+          },
+          "level": {
+            "type": "number",
+            "example": 3,
+            "minimum": 1
+          },
+          "country": {
+            "type": "string",
+            "example": "Canada"
+          },
+          "city": {
+            "type": "string",
+            "example": "Toronto"
+          },
+          "founded_year": {
+            "type": "number",
+            "example": 1999
+          },
+          "annual_revenue": {
+            "type": "number",
+            "example": 222222
+          },
+          "employees": {
+            "type": "number",
+            "example": 300
+          }
+        }
+      },
+      "StringRangeDto": {
+        "type": "object",
+        "properties": {
+          "start": {
+            "type": "string",
+            "example": ""
+          },
+          "end": {
+            "type": "string",
+            "example": ""
+          }
+        },
+        "required": [
+          "start",
+          "end"
+        ]
+      },
+      "MinMaxStringDto": {
+        "type": "object",
+        "properties": {
+          "min": {
+            "type": "string",
+            "example": ""
+          },
+          "max": {
+            "type": "string",
+            "example": ""
+          }
+        },
+        "required": [
+          "min",
+          "max"
+        ]
+      },
+      "CompaniesFilterDto": {
+        "type": "object",
+        "properties": {
+          "level": {
+            "example": [
+              1,
+              2
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "country": {
+            "example": [
+              "China",
+              "USA"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "city": {
+            "example": [],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "founded_year": {
+            "$ref": "#/components/schemas/StringRangeDto"
+          },
+          "annual_revenue": {
+            "$ref": "#/components/schemas/MinMaxStringDto"
+          },
+          "employees": {
+            "$ref": "#/components/schemas/MinMaxStringDto"
+          }
+        },
+        "required": [
+          "level",
+          "country",
+          "city",
+          "founded_year",
+          "annual_revenue",
+          "employees"
+        ]
+      },
+      "FilterRequestDto": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string",
+            "enum": [
+              "level",
+              "country",
+              "city"
+            ],
+            "example": "country"
+          },
+          "filter": {
+            "$ref": "#/components/schemas/CompaniesFilterDto"
+          }
+        },
+        "required": [
+          "dimension",
+          "filter"
+        ]
+      }
+    }
+  }
+}
